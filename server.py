@@ -7,7 +7,7 @@ import os
 from zipfile import ZipFile
 
 world_file_name = 'world_data.zip'
-server_directory = './mserver'
+server_directory = 'java_server'
 drive_folder_id = '1oNYDKZX0lE0hPmRp9PLM0Mp545plJvXo'
 
 # Runs the minecraft server
@@ -16,7 +16,7 @@ def runServer():
 	
 	server_command = 'java -Xmx1024M -Xms1024M -jar server.jar nogui'
 	original_directory = os.getcwd()
-	os.chdir(original_directory+'/mserver/')
+	os.chdir(original_directory+'/'+server_directory+'/')
 	os.system(server_command)
 	os.chdir(original_directory)
 
@@ -26,7 +26,7 @@ def zipWorld():
 	print('Preparing local world files for upload')
   
 	# calling function to get all file paths in the directory
-	file_paths,zip_names = get_all_file_paths(server_directory)
+	file_paths,zip_names = get_all_file_paths('./'+server_directory)
   
 	# writing files to a zipfile
 	with ZipFile(world_file_name,'w') as zip_file:
@@ -44,14 +44,7 @@ def unzipWorld():
 		zip.printdir()
 	  
 		# extracting all the files
-		#print('Extracting all the files now...')
-		zip.extractall(path=server_directory)
-		#print('Done!')
-
-
-# importing required modules
-from zipfile import ZipFile
-import os
+		zip.extractall(path='./'+server_directory)
 
 # code from https://www.geeksforgeeks.org/working-zip-files-python/ 
 def get_all_file_paths(directory):
@@ -158,25 +151,31 @@ def getProgramMode():
 
 def main():
 
-	#mode = getProgramMode()
-	mode = 1  # comment out to test other modes
+	mode = getProgramMode()
 	
 	if mode == 1:
-		#zipWorld()
-		# drive = getDriveConnection()
-		# file_id = findWorldFileID(drive)
-		# downloadWorld(drive,file_id)
-		# unzipWorld()
-		# uploadWorld(drive,file_id)
 		print('mode 1')
+		drive = getDriveConnection()
+		file_id = findWorldFileID(drive)
+		downloadWorld(drive,file_id)
+		unzipWorld()
+		runServer()
+		zipWorld()
+		file_id = findWorldFileID(drive)
+		uploadWorld(drive,file_id)
 	elif mode == 2:
 		print('mode 2')
+		runServer()
+		zipWorld()
+		drive = getDriveConnection()
+		file_id = findWorldFileID(drive)
+		uploadWorld(drive,file_id)
 	elif mode == 3:
 		print('mode 3')
+		runServer()
 	else:
 		print('Bad program mode.')
-		exit()
-	runServer()
+	
 	exit()
 
 if __name__ == "__main__":
