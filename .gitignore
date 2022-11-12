@@ -1,0 +1,4 @@
+*.zip
+/java_server
+/testing
+mycreds.txt
