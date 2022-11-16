@@ -84,7 +84,7 @@ def downloadWorld(drive,file_id):
 	else:
 		gfile = drive.CreateFile({'id':file_id})
 		
-	print('Downloading world file. Any local world data will be overwritten. Sorry :3')
+	print('Downloading world file. Any local zipped world data will be overwritten. Sorry :3')
 	gfile.GetContentFile(world_file_name)
 
 # Uploads the world file to the google drive world folder
@@ -140,13 +140,12 @@ def getDriveConnection():
 	return GoogleDrive(gauth)  
 
 def getProgramMode():
-	print("Type 1 + enter use the latest world from google drive\n" \
-		 +"Type 2 + enter to use your local world and after play your local world will still update google drive\n" \
-		 +"Type 3 + enter to use your local world with no google drive interaction")
+	print("Type 1 + enter to download the latest world from drive\n" \
+		 +"Type 2 + enter to upload your local world to drive\n" \
+		 +"Type 3 + enter to start the server\n" \
+		 +"Type 4 + enter to exit this program\n" )
 	mode = input()
-	print(mode)
-	print(type(mode))
-	if mode != '1' and mode != '2' and mode != '3':
+	if mode != '1' and mode != '2' and mode != '3' and mode != '4':
 		return getProgramMode()
 	else:
 		return int(mode)
@@ -161,32 +160,31 @@ def getJar():
 		os.chdir(original_directory)
 
 def main():
+
 	getJar()
-	mode = getProgramMode()
-	
-	if mode == 1:
-		print('mode 1')
-		drive = getDriveConnection()
-		file_id = findWorldFileID(drive)
-		downloadWorld(drive,file_id)
-		unzipWorld()
-		runServer()
-		zipWorld()
-		file_id = findWorldFileID(drive)
-		uploadWorld(drive,file_id)
-	elif mode == 2:
-		print('mode 2')
-		runServer()
-		zipWorld()
-		drive = getDriveConnection()
-		file_id = findWorldFileID(drive)
-		uploadWorld(drive,file_id)
-	elif mode == 3:
-		print('mode 3')
-		runServer()
-	else:
-		print('Bad program mode.')
-	
+	while True:
+		mode = getProgramMode()
+	  
+		if mode == 1:
+			print('Downloading latest world')
+			drive = getDriveConnection()
+			file_id = findWorldFileID(drive)
+			downloadWorld(drive,file_id)
+			unzipWorld()
+		elif mode == 2:
+			print('Uploading your local world')
+			zipWorld()
+			drive = getDriveConnection()
+			file_id = findWorldFileID(drive)
+			uploadWorld(drive,file_id)
+		elif mode == 3:
+			print('Running the server')
+			runServer()
+		elif mode == 4:
+			print('Exiting')
+			exit()
+		else:
+			print('Bad program mode.')
 	exit()
 
 if __name__ == "__main__":
