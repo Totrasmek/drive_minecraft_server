@@ -5,17 +5,19 @@ from pydrive2.drive import GoogleDrive
 import os
 # For zipping world files for upload
 from zipfile import ZipFile
+import urllib.request
 
 world_file_name = 'world_data.zip'
+original_directory = os.getcwd()
 server_directory = 'java_server'
 drive_folder_id = '1oNYDKZX0lE0hPmRp9PLM0Mp545plJvXo'
+jar_download_link = 'https://piston-data.mojang.com/v1/objects/f69c284232d7c7580bd89a5a4931c3581eae1378/server.jar'
+
 
 # Runs the minecraft server
 def runServer():
 	print('Running the minecraft server.')
-	
 	server_command = 'java -Xmx1024M -Xms1024M -jar server.jar nogui'
-	original_directory = os.getcwd()
 	os.chdir(original_directory+'/'+server_directory+'/')
 	os.system(server_command)
 	os.chdir(original_directory)
@@ -148,9 +150,18 @@ def getProgramMode():
 		return getProgramMode()
 	else:
 		return int(mode)
+		
+def getJar():
+	if os.path.isfile(original_directory+'/'+server_directory+'/server.jar'):
+		print("No server.jar download required")
+	else:
+		os.chdir(original_directory+'/'+server_directory+'/')
+		print("Downloading server.jar ...")
+		urllib.request.urlretrieve(jar_download_link, "server.jar")
+		os.chdir(original_directory)
 
 def main():
-
+	getJar()
 	mode = getProgramMode()
 	
 	if mode == 1:
@@ -180,3 +191,4 @@ def main():
 
 if __name__ == "__main__":
 	main()
+	
