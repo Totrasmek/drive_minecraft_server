@@ -160,7 +160,8 @@ def getJar():
 		os.chdir(original_directory)
 
 def main():
-
+	if not os.path.exists(os.path.join(original_directory,server_directory)):
+		os.mkdir(os.path.join(original_directory,server_directory))
 	getJar()
 	while True:
 		mode = getProgramMode()
