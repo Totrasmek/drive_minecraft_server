@@ -13,15 +13,6 @@ server_directory = 'java_server'
 drive_folder_id = '1oNYDKZX0lE0hPmRp9PLM0Mp545plJvXo'
 jar_download_link = 'https://piston-data.mojang.com/v1/objects/f69c284232d7c7580bd89a5a4931c3581eae1378/server.jar'
 
-
-# Runs the minecraft server
-def runServer():
-	print('Running the minecraft server.')
-	server_command = 'java -Xmx1024M -Xms1024M -jar server.jar nogui'
-	os.chdir(original_directory+'/'+server_directory+'/')
-	os.system(server_command)
-	os.chdir(original_directory)
-
 # Zips the world data files and uploads the .zip
 # code from https://www.geeksforgeeks.org/working-zip-files-python/
 def zipWorld():
@@ -158,9 +149,43 @@ def getJar():
 		print("Downloading server.jar ...")
 		urllib.request.urlretrieve(jar_download_link, "server.jar")
 		os.chdir(original_directory)
+		
+FREEDNS_URL = 'http://freedns.afraid.org/dynamic/update.php?'
+OLDIP_FILE = original_directory + '/oldip.txt'
+USER_KEYS = ["SnluVEw3VElwR3VwTlV4VjRuZkxjQVFEOjIwOTMyMTM1"]
+
+def updatedns(ip):
+    for key in USER_KEYS:
+        print(urllib.request.urlopen(FREEDNS_URL+key).read().strip().decode("utf-8"))
+
+    f = open(OLDIP_FILE, 'w')
+    f.write(ip.decode("utf-8"))
+    f.close()
+
+def updateIP():
+	newip = urllib.request.urlopen("http://ip.dnsexit.com/").read().strip()
+
+	if not os.path.exists(OLDIP_FILE):
+		updatedns(newip)
+	else:
+		f = open(OLDIP_FILE, 'r')
+		oldip = f.read()
+		f.close()
+		if oldip != newip:
+			updatedns(newip)
+			
+# Runs the minecraft server
+def runServer():
+	print('Updating IP on FreeDNS')
+	updateIP()
+	print('Running the minecraft server.')
+	server_command = 'java -Xmx1024M -Xms1024M -jar server.jar nogui'
+	os.chdir(original_directory+'/'+server_directory+'/')
+	os.system(server_command)
+	os.chdir(original_directory)
 
 def main():
-	if not os.path.exists(os.path.join(original_directory,server_directory)):
+	if not os.path.exists(os.path.join(original_directory,server_directory)): 
 		os.mkdir(os.path.join(original_directory,server_directory))
 	getJar()
 	while True:
