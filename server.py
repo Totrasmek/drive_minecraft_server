@@ -11,7 +11,6 @@ world_file_name = 'world_data.zip'
 original_directory = os.getcwd()
 server_directory = 'java_server'
 drive_folder_id = '1oNYDKZX0lE0hPmRp9PLM0Mp545plJvXo'
-jar_download_link = 'https://piston-data.mojang.com/v1/objects/f69c284232d7c7580bd89a5a4931c3581eae1378/server.jar'
 
 # Zips the world data files and uploads the .zip
 # code from https://www.geeksforgeeks.org/working-zip-files-python/
@@ -141,13 +140,44 @@ def getProgramMode():
 	else:
 		return int(mode)
 		
+def get_download_link():
+#concept stolen from https://stackoverflow.com/questions/70746779/python-requests-get-doesnt-return-anything
+    download_url = None;
+
+    import requests
+    webpage_url = "https://www.minecraft.net/en-us/download/server"
+    
+    header_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36 Edg/112.0.1722.48"
+    #header details stolen from https://www.whatismybrowser.com/guides/the-latest-user-agent/edge
+    session = requests.Session()
+    session.headers.update({"User-Agent":header_agent})
+    response = session.get(webpage_url, timeout=2).text
+
+    
+    try:
+        start_text_to_match = "https://piston-data.mojang.com/"
+        end_text_to_match = "server.jar"
+    
+        url_start_index = response.index(start_text_to_match)
+        url_end_index = response[url_start_index:-1].index(end_text_to_match)+len(end_text_to_match)+url_start_index
+
+        download_url = response[url_start_index:url_end_index]
+        
+        print('URL for server.jar download is:\n'+download_url)
+        
+    except ValueError:
+        print('!!!!!!\nCouldn''t locate link to download server.jar in html at\n'+webpage_url+'\n!!!!!!')
+        exit()
+        
+    return download_url
+        
 def getJar():
 	if os.path.isfile(original_directory+'/'+server_directory+'/server.jar'):
 		print("No server.jar download required")
 	else:
 		os.chdir(original_directory+'/'+server_directory+'/')
 		print("Downloading server.jar ...")
-		urllib.request.urlretrieve(jar_download_link, "server.jar")
+		urllib.request.urlretrieve(get_download_link(), "server.jar")
 		os.chdir(original_directory)
 		
 FREEDNS_URL = 'http://freedns.afraid.org/dynamic/update.php?'
